@@ -1,14 +1,16 @@
 package spring.brewery.web.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Positive;
-import java.util.UUID;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -32,4 +34,7 @@ public class BeerDTO {
 
     @Positive
     private Long upc;
+
+    private OffsetDateTime createdDate;
+    private OffsetDateTime lastUpdatedDate;
 }
