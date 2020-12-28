@@ -3,16 +3,22 @@ package spring.brewery.web.controller.v2;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import spring.brewery.services.BeerService;
 import spring.brewery.services.v2.BeerServiceV2;
 import spring.brewery.web.model.v2.BeerDTOV2;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
  *This class handle a get mapping to return back a beer id
  */
+@Validated
 @RestController
 @RequestMapping("/api/v2/beer")
 public class BeerControllerV2 {
@@ -25,13 +31,13 @@ public class BeerControllerV2 {
 
     @GetMapping({"/{beerId}"}) //Path parameter || Path variable
     //I'm being specific in @pathvariable, but it's not necessary 'cause mapping & variable has the same name
-    public ResponseEntity<BeerDTOV2> getBeer(@PathVariable("beerId") UUID beerId){
+    public ResponseEntity<BeerDTOV2> getBeer(@NotNull @PathVariable("beerId") UUID beerId){
 
         return new ResponseEntity<>(beerServiceV2.getBeerById(beerId), HttpStatus.OK);
     }
 
     @PostMapping //This create a new beer
-    public ResponseEntity handlePost (@RequestBody BeerDTOV2 beerDTO){ //RequestBody is used to get the object, otherwise I get an empty object
+    public ResponseEntity handlePost (@Valid @RequestBody BeerDTOV2 beerDTO){ //RequestBody is used to get the object, otherwise I get an empty object
 
         BeerDTOV2 savedDto = beerServiceV2.saveNewBeer(beerDTO);
 
@@ -43,7 +49,7 @@ public class BeerControllerV2 {
     }
 
     @PutMapping({"/{beerId}"})
-    public ResponseEntity handleUpdateById (@PathVariable("beerId") UUID beerId, @RequestBody BeerDTOV2 beerDTO){
+    public ResponseEntity handleUpdateById (@PathVariable("beerId") UUID beerId, @Valid @RequestBody BeerDTOV2 beerDTO){
 
         beerServiceV2.updateBeerById(beerId, beerDTO);
 
@@ -56,4 +62,23 @@ public class BeerControllerV2 {
 
         beerServiceV2.deleteBeerById(beerId);
     }
+
+
+    /**
+     * This method returns a list of errors
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<List> validationErrorHandler(ConstraintViolationException e){
+
+        List<String> errors = new ArrayList<>(e.getConstraintViolations().size());
+
+        e.getConstraintViolations().forEach(constraintViolation -> {
+            errors.add(constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() );
+        });
+
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
 }

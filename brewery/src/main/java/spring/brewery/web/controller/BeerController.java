@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import spring.brewery.services.BeerService;
 import spring.brewery.web.model.BeerDTO;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 /**
@@ -31,7 +32,7 @@ public class BeerController {
     }
 
     @PostMapping //This create a new beer
-    public ResponseEntity handlePost (@RequestBody BeerDTO beerDTO){ //RequestBody is used to get the object, otherwise I get an empty object
+    public ResponseEntity handlePost (@Valid @RequestBody BeerDTO beerDTO){ //RequestBody is used to get the object, otherwise I get an empty object
 
         BeerDTO savedDto = beerService.saveNewBeer(beerDTO);
 
@@ -39,11 +40,11 @@ public class BeerController {
         //todo add host to utl on "headerValue" actually is the same as http://localhost:8080/api/v1/beer
         headers.add("Location","/api/v1/beer/"+savedDto.getBeerId().toString());
 
-        return new ResponseEntity(headers, HttpStatus.CREATED);
+        return new  ResponseEntity(headers, HttpStatus.CREATED);
     }
 
     @PutMapping({"/{beerId}"})
-    public ResponseEntity handleUpdateById (@PathVariable("beerId") UUID beerId, @RequestBody BeerDTO beerDTO){
+    public ResponseEntity handleUpdateById (@PathVariable("beerId") UUID beerId, @Valid @RequestBody BeerDTO beerDTO){
 
         beerService.updateBeerById(beerId, beerDTO);
 

@@ -3,15 +3,21 @@ package spring.brewery.web.controller;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import spring.brewery.services.CostumerService;
 import spring.brewery.web.model.CostumerDTO;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
  *This class handle a get mapping to return back a beer id
  */
+@Validated
 @RestController
 @RequestMapping("/api/v1/costumer")
 public class CostumerController {
@@ -29,7 +35,7 @@ public class CostumerController {
     }
 
     @PostMapping //This create a new Costumer
-    public ResponseEntity handlePost (@RequestBody CostumerDTO costumerDTO){ //RequestBody is used to get the object, otherwise I get an empty object
+    public ResponseEntity handlePost (@Valid @RequestBody CostumerDTO costumerDTO){ //RequestBody is used to get the object, otherwise I get an empty object
 
         CostumerDTO savedDto = costumerService.saveNewCostumer(costumerDTO);
 
@@ -41,7 +47,7 @@ public class CostumerController {
     }
 
     @PutMapping({"/{costumerId}"})
-    public ResponseEntity handleUpdateById (@PathVariable("costumerId") UUID costumerId, @RequestBody CostumerDTO costumerDTO){
+    public ResponseEntity handleUpdateById (@PathVariable("costumerId") UUID costumerId, @Valid @RequestBody CostumerDTO costumerDTO){
 
         costumerService.updateCostumerById(costumerId, costumerDTO);
 
@@ -53,6 +59,23 @@ public class CostumerController {
     public void deleteCostumerById (@PathVariable("costumerId") UUID costumerId){
 
         costumerService.deleteCostumerById(costumerId);
+    }
+
+    /**
+     * This method returns a list of errors
+     * @param e error class
+     * @return a list of errors
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<List> validationErrorHandler(ConstraintViolationException e){
+
+        List<String> errors = new ArrayList<>(e.getConstraintViolations().size());
+
+        e.getConstraintViolations().forEach(constraintViolation -> {
+            errors.add(constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() );
+        });
+
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
 }
