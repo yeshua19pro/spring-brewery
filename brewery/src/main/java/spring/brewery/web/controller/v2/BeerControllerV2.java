@@ -8,11 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import spring.brewery.services.v2.BeerServiceV2;
 import spring.brewery.web.model.v2.BeerDTOV2;
 
-import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -63,22 +60,5 @@ public class BeerControllerV2 {
         beerServiceV2.deleteBeerById(beerId);
     }
 
-
-    /**
-     * This method returns a list of errors
-     * @param e
-     * @return
-     */
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<List> validationErrorHandler(ConstraintViolationException e){
-
-        List<String> errors = new ArrayList<>(e.getConstraintViolations().size());
-
-        e.getConstraintViolations().forEach(constraintViolation -> {
-            errors.add(constraintViolation.getPropertyPath() + " " + constraintViolation.getMessage() );
-        });
-
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
 
 }
